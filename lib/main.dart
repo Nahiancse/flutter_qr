@@ -1,7 +1,13 @@
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:link_qr/save.dart';
+
 import 'scanner.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async{
+  await Hive.initFlutter();
+  await Hive.openBox('testBox');
+
   runApp(MyApp());
 }
 
@@ -9,6 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -174,21 +181,30 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.only(bottom: 5),
-                    height: 50,
-                    width: 250,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                    child: Text(
-                      'Saved List',
-                      style: TextStyle(
-                          color: Color(0xff010133),
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold),
+                  GestureDetector(
+                    onTap: (){
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Save()),
+                      );
+
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(bottom: 5),
+                      height: 50,
+                      width: 250,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Text(
+                        'Saved List',
+                        style: TextStyle(
+                            color: Color(0xff010133),
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                   Container(

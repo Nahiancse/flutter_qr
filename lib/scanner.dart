@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:link_qr/reject.dart';
 import 'package:link_qr/save.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'sql_helper.dart';
+
 class Scanner extends StatefulWidget {
   @override
   _ScannerState createState() => _ScannerState();
@@ -13,6 +14,7 @@ class Scanner extends StatefulWidget {
 class _ScannerState extends State<Scanner> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
+   late final Box scanbox; 
  
 
    
@@ -22,6 +24,14 @@ class _ScannerState extends State<Scanner> {
     controller?.dispose();
     super.dispose();
   }
+
+   @override
+  void initState() {
+    super.initState();
+    // Get reference to an already opened box
+    scanbox = Hive.box('testBox');
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -97,11 +107,13 @@ class _ScannerState extends State<Scanner> {
                   children: [
                     TextButton(
                       child: Text('Save'),
-                      onPressed: () {
+                      onPressed: () async{
+                        await scanbox.put('scandata', scanData.code);
+
                         Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
                           return Save(
-                            data: scanData.code,
+                            // data: scanData.code,
                           );
                         }));
                       },
