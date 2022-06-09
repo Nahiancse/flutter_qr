@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:link_qr/home.dart';
+import 'package:link_qr/main.dart';
 import 'package:link_qr/reject.dart';
 import 'package:link_qr/save.dart';
+import 'package:link_qr/savee.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -14,10 +17,52 @@ class Scanner extends StatefulWidget {
 class _ScannerState extends State<Scanner> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
-   late final Box scanbox; 
- 
+  late final Box scanbox;
+  List<Map<String, dynamic>> _items = [];
+  List<Map<String, dynamic>> _items2 = [];
+  var a = 1;
+  var b = 1;
+  final _scanbox = Hive.box('testBox');
+  final _scanbox2 = Hive.box('testBox2');
 
-   
+  /////////////////////hive////////////////////////////
+  // Get all items from the database
+  void _refreshItems() {
+    final data = _scanbox.keys.map((key) {
+      final value = _scanbox.get(key);
+      return {"key": key, "name": value["name"], "quantity": value['quantity']};
+    }).toList();
+
+    //for reject
+    final data2 = _scanbox2.keys.map((key) {
+      final value2 = _scanbox2.get(key);
+      return {
+        "key": key,
+        "name": value2["name"],
+        "quantity": value2['quantity']
+      };
+    }).toList();
+
+    setState(() {
+      _items = data.reversed.toList();
+      _items2 = data2.reversed.toList();
+      // we use "reversed" to sort items in order from the latest to the oldest
+    });
+  }
+
+  // Create new item
+  Future<void> _createItem(Map<String, dynamic> newItem) async {
+    await _scanbox.add(newItem);
+    _refreshItems(); // update the UI
+  }
+
+  // Create new reject item
+  Future<void> _createItem2(Map<String, dynamic> newItem) async {
+    await _scanbox2.add(newItem);
+    _refreshItems(); // update the UI
+  }
+
+  /////////////////////hive////////////////////////////
 
   @override
   void dispose() {
@@ -25,13 +70,36 @@ class _ScannerState extends State<Scanner> {
     super.dispose();
   }
 
-   @override
+  @override
   void initState() {
     super.initState();
     // Get reference to an already opened box
     scanbox = Hive.box('testBox');
+    _refreshItems(); // Load data when app starts
   }
 
+//   void _showForm(BuildContext ctx, int? itemKey, Barcode scandata) async {
+//     // itemKey == null -> create new item
+//     // itemKey != null -> update an existing item
+    
+      
+      
+//         if(_scanbox.containsKey(itemKey)==itemKey){
+//           ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text('An item has been deleted')));
+//         }
+//         else{
+//  _createItem({"name": a, "quantity": scandata});
+//         a++;
+//         Navigator.push(
+//           context,
+//           MaterialPageRoute(builder: (context) => MyHomePage()),
+//         );
+//         }
+       
+   
+    
+//   }
 
   @override
   Widget build(BuildContext context) {
@@ -80,8 +148,11 @@ class _ScannerState extends State<Scanner> {
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
+  void _onQRViewCreated(
+    QRViewController controller,
+  ) {
     this.controller = controller;
+
     controller.scannedDataStream.listen((scanData) async {
       controller.pauseCamera();
       if (await canLaunch(scanData.code!)) {
@@ -107,23 +178,24 @@ class _ScannerState extends State<Scanner> {
                   children: [
                     TextButton(
                       child: Text('Save'),
-                      onPressed: () async{
-                        await scanbox.put('scandata', scanData.code);
-
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return Save(
-                            // data: scanData.code,
-                          );
-                        }));
+                      onPressed: () async {
+                        _createItem({"name": a, "quantity": scanData.code});
+                        a++;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MyHomePage()),
+                        );
                       },
                     ),
                     TextButton(
                       child: Text('Reject'),
-                      onPressed: () {
-                        // Insert a new journal to the database
-                       
-   
+                      onPressed: () async {
+                        _createItem2({"name": b, "quantity": scanData.code});
+                        b++;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MyHomePage()),
+                        );
                       },
                     ),
                   ],
@@ -134,8 +206,5 @@ class _ScannerState extends State<Scanner> {
         ).then((value) => controller.resumeCamera());
       }
     });
-
-
-    
   }
 }

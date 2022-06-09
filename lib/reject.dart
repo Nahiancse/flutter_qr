@@ -1,165 +1,77 @@
-// import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-// import 'sql_helper.dart';
+class RejectPage extends StatefulWidget {
+  const RejectPage({ Key? key }) : super(key: key);
 
-// class HomePage extends StatefulWidget {
-//    List<Map<String, dynamic>>? journals=[];
+  @override
+  State<RejectPage> createState() => _RejectPageState();
+}
 
-//     HomePage({this.journals});
+class _RejectPageState extends State<RejectPage> {
+  List<Map<String, dynamic>> _items = [];
 
-//   @override
-//   _HomePageState createState() => _HomePageState();
-// }
+  final _scanbox = Hive.box('testBox2');
 
-// class _HomePageState extends State<HomePage> {
-//   // All journals
-//   // List<Map<String, dynamic>> _journals = [];
+  @override
+  void initState() {
+    super.initState();
+    _refreshItems(); // Load data when app starts
+  }
 
-//   // bool _isLoading = true;
-//   // // This function is used to fetch all data from the database
-//   // void _refreshJournals() async {
-//   //   final data = await SQLHelper.getItems();
-//   //   setState(() {
-//   //     _journals = data;
-//   //     _isLoading = false;
-//   //   });
-//   // }
+  // Get all items from the database
+  void _refreshItems() {
+    final data = _scanbox.keys.map((key) {
+      final value = _scanbox.get(key);
+      return {"key": key, "name": value["name"], "quantity": value['quantity']};
+    }).toList();
 
-//   // @override
-//   // void initState() {
-//   //   super.initState();
-//   //   _refreshJournals(); // Loading the diary when the app starts
-//   // }
+    setState(() {
+      _items = data.reversed.toList();
+      // we use "reversed" to sort items in order from the latest to the oldest
+    });
+  }
 
-//   final TextEditingController _titleController = TextEditingController();
-//   final TextEditingController _descriptionController = TextEditingController();
 
-//   // This function will be triggered when the floating button is pressed
-//   // It will also be triggered when you want to update an item
-//   // void _showForm(int? id) async {
-//   //   if (id != null) {
-//   //     // id == null -> create new item
-//   //     // id != null -> update an existing item
-//   //     final existingJournal =
-//   //         _journals.firstWhere((element) => element['id'] == id);
-//   //     _titleController.text = existingJournal['title'];
-//   //     _descriptionController.text = existingJournal['description'];
-//   //   }
 
-//   //   showModalBottomSheet(
-//   //       context: context,
-//   //       elevation: 5,
-//   //       isScrollControlled: true,
-//   //       builder: (_) => Container(
-//   //             padding: EdgeInsets.only(
-//   //               top: 15,
-//   //               left: 15,
-//   //               right: 15,
-//   //               // this will prevent the soft keyboard from covering the text fields
-//   //               bottom: MediaQuery.of(context).viewInsets.bottom + 120,
-//   //             ),
-//   //             child: Column(
-//   //               mainAxisSize: MainAxisSize.min,
-//   //               crossAxisAlignment: CrossAxisAlignment.end,
-//   //               children: [
-//   //                 TextField(
-//   //                   controller: _titleController,
-//   //                   decoration: const InputDecoration(hintText: 'Title'),
-//   //                 ),
-//   //                 const SizedBox(
-//   //                   height: 10,
-//   //                 ),
-//   //                 TextField(
-//   //                   controller: _descriptionController,
-//   //                   decoration: const InputDecoration(hintText: 'Description'),
-//   //                 ),
-//   //                 const SizedBox(
-//   //                   height: 20,
-//   //                 ),
-//   //                 ElevatedButton(
-//   //                   onPressed: () async {
-//   //                     // Save new journal
-//   //                     if (id == null) {
-//   //                       await _addItem();
-//   //                     }
 
-//   //                     if (id != null) {
-//   //                       await _updateItem(id);
-//   //                     }
 
-//   //                     // Clear the text fields
-//   //                     _titleController.text = '';
-//   //                     _descriptionController.text = '';
-
-//   //                     // Close the bottom sheet
-//   //                     Navigator.of(context).pop();
-//   //                   },
-//   //                   child: Text(id == null ? 'Create New' : 'Update'),
-//   //                 )
-//   //               ],
-//   //             ),
-//   //           ));
-//   // }
-
-// // Insert a new journal to the database
-//   // Future<void> _addItem() async {
-//   //   await SQLHelper.createItem(
-//   //       _titleController.text, _descriptionController.text);
-//   //   _refreshJournals();
-//   // }
-
-//   // // Update an existing journal
-//   // Future<void> _updateItem(int id) async {
-//   //   await SQLHelper.updateItem(
-//   //       id, _titleController.text, _descriptionController.text);
-//   //   _refreshJournals();
-//   // }
-
-//   // // Delete an item
-//   // void _deleteItem(int id) async {
-//   //   await SQLHelper.deleteItem(id);
-//   //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-//   //     content: Text('Successfully deleted a journal!'),
-//   //   ));
-//   //   _refreshJournals();
-//   // }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Kindacode.com'),
-//       ),
-//       body:  ListView.builder(
-//               itemCount: widget.journals!.length,
-//               itemBuilder: (context, index) => Card(
-//                 color: Colors.orange[200],
-//                 margin: const EdgeInsets.all(15),
-//                 child: ListTile(
-//                     title: Text(widget.journals![index]['title']),
-//                     subtitle: Text(widget.journals![index]['description']),
-//                     trailing: SizedBox(
-//                       width: 100,
-//                       child: Row(
-//                         children: [
-//                           // IconButton(
-//                           //   icon: const Icon(Icons.edit),
-//                           //   onPressed: () => _showForm(_journals[index]['id']),
-//                           // ),
-//                           // IconButton(
-//                           //   icon: const Icon(Icons.delete),
-//                           //   onPressed: () =>
-//                           //       _deleteItem(_journals[index]['id']),
-//                           // ),
-//                         ],
-//                       ),
-//                     )),
-//               ),
-//             ),
-//       // floatingActionButton: FloatingActionButton(
-//       //   child: const Icon(Icons.add),
-//       //   onPressed: () => _showForm(null),
-//       // ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Rejected Data'),
+      ),
+      body: _items.isEmpty
+          ? const Center(
+              child: Text(
+                'No Data',
+                style: TextStyle(fontSize: 30),
+              ),
+            )
+          : ListView.builder(
+              // the list of items
+              itemCount: _items.length,
+              itemBuilder: (_, index) {
+                final currentItem = _items[index];
+                return Card(
+                  color: Colors.orange.shade100,
+                  margin: const EdgeInsets.all(10),
+                  elevation: 3,
+                  child: ListTile(
+                      title: Text(currentItem['key'].toString()),
+                      subtitle: Text(
+                        currentItem['quantity'].toString(),
+                        style: TextStyle(color: Colors.red),
+                      ),
+                  )
+                );
+              }),
+      // Add new item button
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () => _showForm(context, null),
+      //   child: const Icon(Icons.add),
+      // ),
+    );
+  }
+}
