@@ -145,7 +145,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+       backgroundColor: Colors.purple[100],
       appBar: AppBar(
+        backgroundColor: Colors.purple,
         title: const Text('Saved Data'),
       ),
       body: _items.isEmpty
@@ -161,14 +163,14 @@ class _HomePageState extends State<HomePage> {
               itemBuilder: (_, index) {
                 final currentItem = _items[index];
                 return Card(
-                  color: Colors.orange.shade100,
+                  // color: Colors.orange.shade100,
                   margin: const EdgeInsets.all(10),
                   elevation: 3,
                   child: ListTile(
                       title: Text(currentItem['key'].toString()),
                       subtitle: Text(
                         currentItem['quantity'].toString(),
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: Colors.black),
                       ),
                   )
                 );

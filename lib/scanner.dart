@@ -105,6 +105,7 @@ class _ScannerState extends State<Scanner> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.purple,
         title: Text("Scanner"),
       ),
       body: Stack(
@@ -181,7 +182,7 @@ class _ScannerState extends State<Scanner> {
                       onPressed: () async {
                         _createItem({"name": a, "quantity": scanData.code});
                         a++;
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(builder: (context) => MyHomePage()),
                         );
@@ -192,7 +193,7 @@ class _ScannerState extends State<Scanner> {
                       onPressed: () async {
                         _createItem2({"name": b, "quantity": scanData.code});
                         b++;
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(builder: (context) => MyHomePage()),
                         );
